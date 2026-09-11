@@ -15,7 +15,6 @@ const SkillsPage = () => {
       <PagewithSidePanel
         sections={[
           {
-            imageSrc: "/images/TechnicalSkills.png",
             title: "Core Skills",
             content:
               "A breakdown of technical capabilities, growth strategies, and workflow automation systems. These tools enable me to build business websites, automate operations, and execute scalable digital campaigns.",

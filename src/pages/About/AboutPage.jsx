@@ -9,7 +9,6 @@ const AboutPage = () => {
       <PagewithSidePanel
         sections={[
           {
-            imageSrc: "/images/About.png",
             title: "Introduction",
             header: "Vincent Tapoc",
             subheader: "Front End Developer / Marketing Management / Vibe Coder / Web Developer",
@@ -21,7 +20,6 @@ const AboutPage = () => {
             variant: "profile",
           },
           {
-            imageSrc: "/images/About2.png",
             title: "Guiding Principles",
             content: [
               "01. Strategy to Execution (Bridge goals to systems) — Translating business goals into scalable technical solutions that bridge marketing insight with modern development practices.",

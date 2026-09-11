@@ -326,4 +326,4 @@ export default function Model(props) {
   );
 }
 
-useGLTF.preload("/darktargets.glb");
+useGLTF.preload("/models/darktargets.glb");

@@ -23,12 +23,12 @@ const Experience = () => {
 
   const zoomValues = {
     default: isMobile
-      ? 66     // Phones
+      ? 57     // Phones
       : isTablet
-      ? 85     // Tablets NEW proper layer
+      ? 73     // Tablets
       : isLaptop
-      ? 95     // Laptops
-      : 110,  // Desktop
+      ? 82     // Laptops
+      : 95,    // Desktop
   };
 
   useEffect(() => {
@@ -41,19 +41,19 @@ const Experience = () => {
   }, []);
 
   useEffect(() => {
-  if (!cameraRef.current) return;
+    if (!cameraRef.current) return;
 
-  const zoom = isMobile
-    ? 66     // Phones
-    : isTablet
-    ? 85     // Tablets 
-    : isLaptop
-    ? 95     // Laptops
-    : 110;   // Desktop
+    const zoom = isMobile
+      ? 57     // Phones
+      : isTablet
+      ? 73     // Tablets 
+      : isLaptop
+      ? 82     // Laptops
+      : 95;    // Desktop
 
-  cameraRef.current.zoom = zoom;
-  cameraRef.current.updateProjectionMatrix();
-}, [isMobile, isTablet, isLaptop]);
+    cameraRef.current.zoom = zoom;
+    cameraRef.current.updateProjectionMatrix();
+  }, [isMobile, isTablet, isLaptop]);
 
   const cameraPositions = {
       dark: { position: new THREE.Vector3(31.1246, 26.365, 31.306).multiplyScalar(1.5) },
@@ -73,6 +73,7 @@ const Experience = () => {
 
     const overlay = document.querySelector(".transition-overlay");
     if (overlay) overlay.style.backgroundColor = isDarkRoom ? "black" : "#ebebebff";
+    document.body.style.backgroundColor = isDarkRoom ? "#0A0A0A" : "#EBEBEB";
 
     setTransitionText(isDarkRoom ? "Lead with calm." : "Grow brighter.");
 
@@ -302,8 +303,14 @@ const Experience = () => {
       </div>
 
       <Canvas
+        shadows={{ type: THREE.PCFSoftShadowMap }}
         className="r3f-canvas"
         style={{ position: "fixed", zIndex:0, top: 0, left: 0, opacity: 1, pointerEvents: "auto", transition: "opacity 1s ease" }}
+        gl={{
+          antialias: true,
+          toneMapping: THREE.ACESFilmicToneMapping,
+          toneMappingExposure: 1.0,
+        }}
       >
         <OrthographicCamera
           ref={cameraRef}

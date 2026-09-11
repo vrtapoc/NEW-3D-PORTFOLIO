@@ -33,7 +33,6 @@ const ContactsPage = () => {
       <PagewithSidePanel
         sections={[
           {
-            imageSrc: "/images/ContactMe.png",
             title: "Contact Me",
             content: "Interested in my work or considering me for an opportunity? You can connect through the contact icons or send a direct message using the form below. I am open to project inquiries and career opportunities.",
             icons: [

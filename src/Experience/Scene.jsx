@@ -1,42 +1,26 @@
 import React, { Suspense, useRef, useState, useEffect } from "react";
 import * as THREE from "three";
 import Dark1stOffice from "./models/DarkOffice1st";
-import Dark2ndOffice from "./models/DarkOffice2nd";
-import Dark3rdOffice from "./models/DarkOffice3rd";
-import Dark4thOffice from "./models/DarkOffice4th";
-import Dark5thOffice from "./models/DarkOffice5th";
-import Dark6thOffice from "./models/DarkOffice6th";
 import Light1stHomeOffice from "./models/LightOffice1st";
-import Light2ndHomeOffice from "./models/LightOffice2nd";
-import Light3rdHomeOffice from "./models/LightOffice3rd";
-import Light4thHomeOffice from "./models/LightOffice4th";
-import Light5thHomeOffice from "./models/LightOffice5th";
-import Light6thHomeOffice from "./models/LightOffice6th";
-import Light7thHomeOffice from "./models/LightOffice7th.jsx";
-import DarkTargets from "./models/Darktargets";
-import LightTargets from "./models/Lighttargets";
-import Gridplanes from "./components/GridPlanes";
 import { useFrame } from "@react-three/fiber";
 import { useToggleRoomStore } from "../stores/toggleRoomStore.js";
-import gsap from "gsap";
+import { EffectComposer, Bloom, N8AO } from "@react-three/postprocessing";
+import { Environment } from "@react-three/drei";
 
-const Scene = ({ pointerRef}) => {
+const Scene = ({ pointerRef }) => {
   const darkgroupRef = useRef();
   const lightgroupRef = useRef();
-  const gridPlanesRef = useRef();
-  const darkRoomGroupPosition = new THREE.Vector3(0, 0, 0);
   const lightRoomGroupPosition = new THREE.Vector3(1.24, 0, -32.431);
 
   const groupRotationRef = useRef(0);
   const { isDarkRoom } = useToggleRoomStore();
   const [sceneReady, setSceneReady] = useState(false);
 
-  // Toggle visibility instead of disposing
+  // Toggle visibility smoothly matching transition overlay
   useEffect(() => {
     if (!darkgroupRef.current || !lightgroupRef.current) return;
 
-    // Wait a bit before toggling visibility 
-    const delay = 3000; // 1 second (adjust to match your overlay duration)
+    const delay = 3000;
     const timeout = setTimeout(() => {
       darkgroupRef.current.visible = isDarkRoom;
       lightgroupRef.current.visible = !isDarkRoom;
@@ -45,27 +29,11 @@ const Scene = ({ pointerRef}) => {
     return () => clearTimeout(timeout);
   }, [isDarkRoom]);
 
-  // Slightly delay grid move for smoother transition
-    if (gridPlanesRef.current) {
-      const targetPosition = isDarkRoom
-        ? darkRoomGroupPosition
-        : lightRoomGroupPosition;
-
-      gsap.to(gridPlanesRef.current.position, {
-        x: targetPosition.x,
-        y: targetPosition.y,
-        z: targetPosition.z,
-        duration: 1,
-        delay: 0.5,
-        ease: "power2.inOut",
-      });
-    }
-
   // Smooth pointer-based rotation
   useFrame(() => {
-    if (!darkgroupRef.current || !lightgroupRef.current || !gridPlanesRef.current) return;
+    if (!darkgroupRef.current || !lightgroupRef.current) return;
 
-    const targetRotation = pointerRef.current.x * Math.PI * 0.02;
+    const targetRotation = pointerRef?.current?.x ? pointerRef.current.x * Math.PI * 0.02 : 0;
 
     groupRotationRef.current = THREE.MathUtils.lerp(
       groupRotationRef.current,
@@ -75,7 +43,6 @@ const Scene = ({ pointerRef}) => {
 
     darkgroupRef.current.rotation.y = groupRotationRef.current;
     lightgroupRef.current.rotation.y = groupRotationRef.current;
-    gridPlanesRef.current.rotation.y = groupRotationRef.current;
 
     // Trigger "scene-ready" once for fade-in sync
     if (!sceneReady) {
@@ -88,19 +55,44 @@ const Scene = ({ pointerRef}) => {
 
   return (
     <Suspense fallback={null}>
-      {/* Dark Room */}
-      <group ref={darkgroupRef}>
+      <color attach="background" args={[isDarkRoom ? "#0B0A0D" : "#EBEBEB"]} />
+
+      {/* 1. ENVIRONMENT REFLECTION FOR DARK OFFICE */}
+      {isDarkRoom && <Environment preset="city" environmentIntensity={0.25} />}
+
+      {/* Dark Room — Architecture Focus: Walls, Built-in Shelves & PBR Wood Flooring */}
+      <group ref={darkgroupRef} visible={isDarkRoom}>
+        {/* Soft Dark Slate/Indigo Ambient Fill (adds readable depth to shadows) */}
+        <ambientLight color="#2A2B36" intensity={0.35} />
+        <directionalLight position={[12, 22, 14]} intensity={0.20} color="#3A3028" />
+
+        {/* Signature Atmospheric Background Studio Void Glow */}
+        <pointLight position={[-7.0, 2.5, 2.0]} color="#523B68" intensity={1.4} distance={14} decay={2} />
+        <pointLight position={[6.5, 1.5, 5.5]} color="#4A3422" intensity={0.9} distance={12} decay={2} />
+        <pointLight position={[0, 1.5, -5.0]} color="#2A1E38" intensity={1.2} distance={12} decay={2} />
+
+        {/* Clean Base Room Shell */}
         <Dark1stOffice />
-        <Dark2ndOffice />
-        <Dark3rdOffice />
-        <Dark4thOffice />
-        <Dark5thOffice />
-        <Dark6thOffice />
-        <DarkTargets/>
       </group>
 
       {/* Light Room */}
-      <group ref={lightgroupRef} position={lightRoomGroupPosition}>
+      <group ref={lightgroupRef} position={lightRoomGroupPosition} visible={!isDarkRoom}>
+        {/* Natural, clean daylight studio lighting for Light Room */}
+        <ambientLight intensity={1.4} color="#FFF9F2" />
+        <directionalLight position={[15, 22, 12]} intensity={1.8} color="#FFFFFF" />
+        <directionalLight position={[-12, 14, -10]} intensity={0.6} color="#DCE6F2" />
+        <pointLight
+          position={[
+            -lightRoomGroupPosition.x + 2,
+            -lightRoomGroupPosition.y + 4.0,
+            -lightRoomGroupPosition.z - 28,
+          ]}
+          intensity={1.0}
+          color="#FFF4E0"
+          distance={14}
+          decay={2}
+        />
+
         <Light1stHomeOffice
           position={[
             -lightRoomGroupPosition.x,
@@ -108,66 +100,21 @@ const Scene = ({ pointerRef}) => {
             -lightRoomGroupPosition.z,
           ]}
         />
-        <Light2ndHomeOffice
-          position={[
-            -lightRoomGroupPosition.x,
-            -lightRoomGroupPosition.y,
-            -lightRoomGroupPosition.z,
-          ]}
-        />
-        <Light3rdHomeOffice
-          position={[
-            -lightRoomGroupPosition.x,
-            -lightRoomGroupPosition.y,
-            -lightRoomGroupPosition.z,
-          ]}
-        />
-        <Light4thHomeOffice
-          position={[
-            -lightRoomGroupPosition.x,
-            -lightRoomGroupPosition.y,
-            -lightRoomGroupPosition.z,
-          ]}
-        />
-        <Light5thHomeOffice
-          position={[
-            -lightRoomGroupPosition.x,
-            -lightRoomGroupPosition.y,
-            -lightRoomGroupPosition.z,
-          ]}
-        />
-        <Light6thHomeOffice
-          position={[
-            -lightRoomGroupPosition.x,
-            -lightRoomGroupPosition.y,
-            -lightRoomGroupPosition.z,
-          ]}
-        />
-        <Light7thHomeOffice
-          position={[
-            -lightRoomGroupPosition.x,
-            -lightRoomGroupPosition.y,
-            -lightRoomGroupPosition.z,
-          ]}
-        />
-        <LightTargets
-          position={[
-            -lightRoomGroupPosition.x,
-            -lightRoomGroupPosition.y,
-            -lightRoomGroupPosition.z,
-          ]}
-        />  
       </group>
 
-      {/* Grid */}
-      <Gridplanes
-        ref={gridPlanesRef}
-        rows={8}no
-        columns={8}
-        planeWidth={3}
-        planeDepth={3}
-        spacing={0}
-      />
+      {/* Cinematic Post-Processing: Subtle Bloom + Ambient Occlusion */}
+      {isDarkRoom && (
+        <EffectComposer disableNormalPass multisampling={4}>
+          <N8AO intensity={1.2} distanceFalloff={0.4} aoRadius={0.6} />
+          <Bloom
+            intensity={0.35}
+            luminanceThreshold={0.82}
+            luminanceSmoothing={0.3}
+            mipmapBlur
+            radius={0.4}
+          />
+        </EffectComposer>
+      )}
     </Suspense>
   );
 };

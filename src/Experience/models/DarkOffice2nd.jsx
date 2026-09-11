@@ -73,4 +73,4 @@ export default function Model(props) {
   )
 }
 
-useGLTF.preload('/DarkOffice2nd.glb')
+useGLTF.preload('/models/DarkOffice2nd.glb')

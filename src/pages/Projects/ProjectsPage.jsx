@@ -9,13 +9,11 @@ const ProjectsPage = () => {
       <PagewithSidePanel
         sections={[
           {
-            imageSrc: "/images/Projects.png",
             title: "Selected Experience",
             content:
               "A collection of projects and roles spanning web development, marketing partnerships, and automation pipelines. Each entry highlights the core objective, technology stack, and business impact.",
           },
           {
-            imageSrc: "/images/Spectron.png",
             title: "Tee Streets",
             subheader: "Automation   ·   Video Editing   ·   Social Media",
             content: [
@@ -23,7 +21,6 @@ const ProjectsPage = () => {
             ],
           },
           {
-            imageSrc: "/images/VietRestaurant.png",
             title: "Liz Taiwan Stay",
             subheader: "Web Design   ·   Base44   ·   Airbnb",
             content: [
@@ -37,7 +34,6 @@ const ProjectsPage = () => {
             ],
           },
           {
-            imageSrc: "/images/MythicalAtlas.png",
             title: "Celestins Agency",
             subheader: "Marketing   ·   Partnerships   ·   Lead Gen",
             content: [
@@ -45,7 +41,6 @@ const ProjectsPage = () => {
             ],
           },
           {
-            imageSrc: "/images/EmoWarn.png",
             title: "Boo Enterprises Inc.",
             subheader: "Brand Deals   ·   Campaigns   ·   Content",
             content: [
@@ -53,7 +48,6 @@ const ProjectsPage = () => {
             ],
           },
           {
-            imageSrc: "/images/FlowKanban.png",
             title: "Thinksanity NFT",
             subheader: "Community   ·   Content   ·   Engagement",
             content: [
@@ -61,7 +55,6 @@ const ProjectsPage = () => {
             ],
           },
           {
-            imageSrc: "/images/Cifake.png",
             title: "Dap Props LLC",
             subheader: "Operations   ·   Client Support   ·   Marketing",
             content: [
