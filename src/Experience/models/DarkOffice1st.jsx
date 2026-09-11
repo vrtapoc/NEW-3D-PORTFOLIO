@@ -109,15 +109,15 @@ export default function Model(props) {
     });
   }, []);
 
-  // ARCHITECTURAL LIGHTING TARGETS (scaled for 1.25x room)
+  // ARCHITECTURAL LIGHTING TARGETS (scaled for 1.25x room and 2-section built-in unit)
   const spotTargets = useMemo(() => {
     const t1 = new THREE.Object3D(); t1.position.set(-2.03, 0.20, 1.16);
     const t2 = new THREE.Object3D(); t2.position.set(-2.03, 0.20, -0.25);
     const t3 = new THREE.Object3D(); t3.position.set(-2.03, 0.20, -1.58);
-    const t4 = new THREE.Object3D(); t4.position.set(-1.12, 0.20, -2.16);
-    const t5 = new THREE.Object3D(); t5.position.set(0.00, 0.20, -2.16);
-    const t6 = new THREE.Object3D(); t6.position.set(1.12, 0.20, -2.16);
-    return { t1, t2, t3, t4, t5, t6 };
+    // 2-Section Back Wall Unit: t4 (Shelving Bay), t5 (Mural Niche)
+    const t4 = new THREE.Object3D(); t4.position.set(-0.94, 0.20, -2.16);
+    const t5 = new THREE.Object3D(); t5.position.set(0.94, 0.20, -2.16);
+    return { t1, t2, t3, t4, t5 };
   }, []);
 
   // Isolate Floor Mesh from Walls/Shelving Geometry
@@ -137,9 +137,11 @@ export default function Model(props) {
     const wallUvs = [];
 
     for (let i = 0; i < pos.count; i += 3) {
-      // Average normal and Y height of triangle
+      // Average normal and position of triangle
       const ny = (norm.getY(i) + norm.getY(i + 1) + norm.getY(i + 2)) / 3;
       const py = (pos.getY(i) + pos.getY(i + 1) + pos.getY(i + 2)) / 3;
+      const px = (pos.getX(i) + pos.getX(i + 1) + pos.getX(i + 2)) / 3;
+      const pz = (pos.getZ(i) + pos.getZ(i + 1) + pos.getZ(i + 2)) / 3;
 
       // Floor triangles are facing upward (ny > 0.8) and at floor level (py < 0.25)
       if (ny > 0.8 && py < 0.25) {
@@ -149,10 +151,14 @@ export default function Model(props) {
           floorUvs.push(uv ? uv.getX(i + j) : 0, uv ? uv.getY(i + j) : 0);
         }
       } else {
-        for (let j = 0; j < 3; j++) {
-          wallPositions.push(pos.getX(i + j), pos.getY(i + j), pos.getZ(i + j));
-          wallNormals.push(norm.getX(i + j), norm.getY(i + j), norm.getZ(i + j));
-          wallUvs.push(uv ? uv.getX(i + j) : 0, uv ? uv.getY(i + j) : 0);
+        // Discard old back wall & baked 3-column shelving triangles (pz < -1.45 && px > -1.55)
+        const isOldBackShelves = pz < -1.45 && px > -1.55;
+        if (!isOldBackShelves) {
+          for (let j = 0; j < 3; j++) {
+            wallPositions.push(pos.getX(i + j), pos.getY(i + j), pos.getZ(i + j));
+            wallNormals.push(norm.getX(i + j), norm.getY(i + j), norm.getZ(i + j));
+            wallUvs.push(uv ? uv.getX(i + j) : 0, uv ? uv.getY(i + j) : 0);
+          }
         }
       }
     }
@@ -175,7 +181,7 @@ export default function Model(props) {
     <group {...props} dispose={null}>
       {/* Scaled Room Shell & Floor: 1.25x width, 1.1x height, 1.25x depth */}
       <group scale={[1.25, 1.1, 1.25]}>
-        {/* 1. Perimeter Walls & Built-in Shelving Mesh (Isolated) */}
+        {/* 1. Perimeter Walls (Isolated) */}
         {wallGeometry && (
           <mesh
             geometry={wallGeometry}
@@ -206,6 +212,49 @@ export default function Model(props) {
             />
           </mesh>
         )}
+
+        {/* 3. Reconfigured 2-Bay Built-In Wall Unit */}
+        <group position={[0, 0, 0]}>
+          {/* Outer Perimeter Frame & Central Dividing Pillar */}
+          {/* Top Header Beam */}
+          <mesh position={[0, 2.30, -1.95]} material={darkWallMaterial} castShadow receiveShadow>
+            <boxGeometry args={[3.10, 0.08, 0.35]} />
+          </mesh>
+          {/* Left Frame Column */}
+          <mesh position={[-1.50, 1.25, -1.95]} material={darkWallMaterial} castShadow receiveShadow>
+            <boxGeometry args={[0.10, 2.10, 0.35]} />
+          </mesh>
+          {/* Right Frame Column */}
+          <mesh position={[1.50, 1.25, -1.95]} material={darkWallMaterial} castShadow receiveShadow>
+            <boxGeometry args={[0.10, 2.10, 0.35]} />
+          </mesh>
+          {/* Center Dividing Pillar (Separates Section A & Section B) */}
+          <mesh position={[0.0, 1.25, -1.95]} material={darkWallMaterial} castShadow receiveShadow>
+            <boxGeometry args={[0.10, 2.10, 0.35]} />
+          </mesh>
+          {/* Bottom Counter / Base Plinth */}
+          <mesh position={[0, 0.24, -1.95]} material={darkWallMaterial} castShadow receiveShadow>
+            <boxGeometry args={[3.10, 0.08, 0.35]} />
+          </mesh>
+          {/* Recessed Alcove Backing Panel */}
+          <mesh position={[0, 1.27, -2.12]} material={darkWallMaterial} receiveShadow>
+            <boxGeometry args={[3.10, 2.10, 0.02]} />
+          </mesh>
+
+          {/* Section A (Left Bay): 3-Tier Horizontal Shelving for Future Objects */}
+          <mesh position={[-0.75, 0.75, -1.95]} material={darkWallMaterial} castShadow receiveShadow>
+            <boxGeometry args={[1.40, 0.04, 0.32]} />
+          </mesh>
+          <mesh position={[-0.75, 1.25, -1.95]} material={darkWallMaterial} castShadow receiveShadow>
+            <boxGeometry args={[1.40, 0.04, 0.32]} />
+          </mesh>
+          <mesh position={[-0.75, 1.75, -1.95]} material={darkWallMaterial} castShadow receiveShadow>
+            <boxGeometry args={[1.40, 0.04, 0.32]} />
+          </mesh>
+
+          {/* Section B (Right Bay): Large, Clean Open Whole-Block Niche for Future Mural/Painting */}
+          {/* Left completely open and recessed without intermediate planks */}
+        </group>
       </group>
 
       {/* Exterior Ground Plane */}
@@ -217,7 +266,7 @@ export default function Model(props) {
         />
       )}
 
-      {/* 3. Architectural Grazing Spotlights with Soft Falloff (penumbra=0.85, #FFE4CC) */}
+      {/* 4. Architectural Grazing Spotlights with Soft Falloff (penumbra=0.85, #FFE4CC) */}
       {/* Left Wall Downlights (3 soft washes) */}
       <primitive object={spotTargets.t1} />
       <spotLight
@@ -255,47 +304,36 @@ export default function Model(props) {
         color="#FFE4CC"
       />
 
-      {/* Back Wall Shelving Downlights (3 soft washes) */}
+      {/* Back Wall 2-Bay Downlights: Aligned to Section A & Section B */}
+      {/* Section A (Shelving Bay) Downlight */}
       <primitive object={spotTargets.t4} />
       <spotLight
-        position={[-1.12, 2.65, -1.78]}
+        position={[-0.94, 2.65, -1.78]}
         target={spotTargets.t4}
         angle={Math.PI / 6}
         penumbra={0.85}
-        intensity={2.8}
+        intensity={3.0}
         distance={7.0}
         decay={2}
         color="#FFE4CC"
       />
 
+      {/* Section B (Mural / Art Niche) Downlight */}
       <primitive object={spotTargets.t5} />
       <spotLight
-        position={[0.00, 2.65, -1.78]}
+        position={[0.94, 2.65, -1.78]}
         target={spotTargets.t5}
         angle={Math.PI / 6}
         penumbra={0.85}
-        intensity={2.8}
+        intensity={3.0}
         distance={7.0}
         decay={2}
         color="#FFE4CC"
       />
 
-      <primitive object={spotTargets.t6} />
-      <spotLight
-        position={[1.12, 2.65, -1.78]}
-        target={spotTargets.t6}
-        angle={Math.PI / 6}
-        penumbra={0.85}
-        intensity={2.8}
-        distance={7.0}
-        decay={2}
-        color="#FFE4CC"
-      />
-
-      {/* Shelving Niche Accent Glow */}
-      <pointLight position={[0, 1.8, -1.9]} color="#FFB370" intensity={0.6} distance={2.5} decay={2} />
-      <pointLight position={[-1.1, 1.8, -1.9]} color="#FFB370" intensity={0.4} distance={2.0} decay={2} />
-      <pointLight position={[1.1, 1.8, -1.9]} color="#FFB370" intensity={0.4} distance={2.0} decay={2} />
+      {/* Shelving & Niche Accent Glow */}
+      <pointLight position={[-0.94, 1.5, -2.1]} color="#FFB370" intensity={0.55} distance={2.5} decay={2} />
+      <pointLight position={[0.94, 1.6, -2.1]} color="#FFB370" intensity={0.55} distance={2.5} decay={2} />
     </group>
   );
 }
