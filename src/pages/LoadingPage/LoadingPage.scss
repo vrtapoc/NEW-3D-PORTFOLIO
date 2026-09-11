@@ -1,0 +1,204 @@
+.loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #060606;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  transition: opacity 0.8s ease;
+}
+
+.loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+}
+
+.intro-message {
+  color: #fff;
+  font-size: 36px;
+  font-weight: 300;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+
+  @media (max-width: 390px) {
+    font-size: 24px;
+  }
+}
+
+.loading-bar-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.loading-bar-container {
+  width: 80%;
+  height: 5px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.loading-bar {
+  width: 0%;
+  height: 100%;
+  background-color: #fff;
+  transition: width 0.3s ease;
+}
+
+.percentage {
+  font-size: 15px;
+  color: #fff;
+  font-weight: 300;
+  letter-spacing: 0.5px;
+}
+
+.loading-item {
+  font-size: 14px;
+  color: #ccc;
+  font-style: italic;
+  text-align: center;
+  max-width: 90%;
+  line-height: 1.4;
+}
+
+.overlay-text {
+  position: absolute;
+  top: 30%;
+  left: 13%;
+  transform: translateY(-50%);
+  color: white;
+  font-size: 32px;
+  font-weight: 300;
+  opacity: 0;
+  animation: fadeInOut 4.5s ease-in-out forwards;
+  pointer-events: none;
+}
+
+.overlay-text2 {
+  position: absolute;
+  top: 30%;
+  left: 13%;
+  transform: translateY(-50%);
+  color: black;
+  font-size: 32px;
+  font-weight: 300;
+  opacity: 0;
+  animation: fadeInOut 4.5s ease-in-out forwards;
+  pointer-events: none;
+
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.glow-text {
+  position: absolute;
+  top: 30%;
+  right: 10%;
+  transform: translateY(-50%);
+  color: white;
+  font-size: 29px;
+  font-weight: 300;
+  opacity: 0;
+  animation: fadeInOut 4.5s ease-in-out forwards;
+  pointer-events: none;
+}
+
+.glow-text2 {
+  position: absolute;
+  top: 30%;
+  right: 12%;
+  transform: translateY(-50%);
+  color: black;
+  font-size: 29px;
+  font-weight: 300;
+  opacity: 0;
+  animation: fadeInOut 4.5s ease-in-out forwards;
+  pointer-events: none;
+}
+
+.overlay-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh; /* full screen height */
+  pointer-events: none;
+  z-index: 1000; /* ensure it sits above canvas */
+}
+
+@media (max-width: 425px) {
+  .overlay-text,
+  .overlay-text2,
+  .glow-text,
+  .glow-text2 {
+    font-size: 22px;
+    position: absolute;
+    bottom: 17%;
+    right: 17%;      /* <-- unified alignment */
+    top: auto;        /* reset old values */
+    left: auto;
+    transform: none;  /* reset translateY */
+    text-align: left;
+  }
+
+}
+
+@media (max-width: 768px) {
+  .overlay-text,
+  .overlay-text2,
+  .glow-text,
+  .glow-text2 {
+    font-size: 26px;
+    position: absolute;
+    bottom: 17%;
+    right: 17%;      /* <-- unified alignment */
+
+    top: auto;        /* reset old values */
+    left: auto;
+    transform: none;  /* reset translateY */
+
+    text-align: left;
+  }
+
+  .overlay-text2,
+  .glow-text2 {
+    font-size: 26px;
+    position: absolute;
+    bottom: 14%;
+    right: 14%;      /* <-- unified alignment */
+
+    top: auto;        /* reset old values */
+    left: auto;
+    transform: none;  /* reset translateY */
+
+    text-align: left;
+  }
+
+}

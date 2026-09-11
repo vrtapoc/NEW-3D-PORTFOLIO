@@ -1,0 +1,146 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@400;500;600;700&display=swap');
+
+.menu {
+  position: fixed;
+  bottom: 5%;
+  left: 5%;
+  z-index: 9999;
+  cursor: pointer;
+}
+
+/* Smooth animation for all menu buttons */
+.nav-button {
+  transition: transform 0.25s ease, filter 0.25s ease;
+
+  rect {
+    transition: fill 0.25s ease;
+  }
+
+  path {
+    transition: fill 0.25s ease;
+  }
+}
+
+/* ===========================
+   ROOM COLOR MODES
+   =========================== */
+
+/* Dark Room (default) */
+.nav-button rect {
+  fill: white !important;
+}
+
+.nav-button path {
+  fill: black !important;
+}
+
+.version-num { 
+  position: fixed;
+  bottom: 5%; 
+  right: 7%; 
+  color: #ffffff;
+  font-size: 1rem; 
+  font-family: "Manrope", sans-serif;
+  line-height: 1.75; 
+  max-width: 95%; 
+  margin-bottom: 1.5rem; 
+  z-index: 500; 
+}
+
+/* Light Room — invert colors */
+.nav-button.light rect {
+  fill: black !important;
+}
+
+.nav-button.light path {
+  fill: white !important;
+}
+
+/* Light room version number */
+.version-num.light{
+  color: black;
+}
+
+/* ===========================
+   HOVER EFFECT (same for both modes)
+   =========================== */
+
+.nav-button:hover {
+  transform: scale(1.10);
+}
+
+.nav-button:hover rect {
+  fill: #C9A857 !important;
+}
+
+/* Layout */
+.first-row,
+.second-row {
+  display: flex;
+  justify-content: column;
+  gap: 12px;
+}
+
+
+
+
+/* RESPONSIVENESS */
+
+/* Mobile */
+@media (max-width: 425px) {
+
+  .menu {
+    bottom: 5%;
+    left: 15%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .first-row,
+  .second-row {
+    flex-direction: row;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  /* Slightly smaller buttons for mobile */
+  .nav-button {
+    transform: scale(0.92);
+  }
+
+  .nav-button svg,
+  .nav-button {
+    width: 40px;
+    height: 40px;
+  }
+
+  /* Disable hover scaling on touch devices */
+  .nav-button:hover {
+    transform: scale(0.92);
+  }
+
+  .version-num {
+    font-size: 0.75rem;
+    bottom: 2%;
+    right: 50%;
+    transform: translateX(50%);
+    text-align: center;
+  }
+
+}
+
+  
+@media (max-width: 768px) {
+  .menu {   
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .version-num {
+    font-size: 0.9rem;
+    bottom: 4%;
+    right: 4%;
+  }
+} 

@@ -1,0 +1,832 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@400;500;600;700&display=swap');
+
+.side-panel {
+  position: fixed;
+  top: 0;
+  right: 0; 
+  height: 100%;      
+  width: 60%;
+  background-color: #0f0f0f;
+  transform: translateX(100%);
+  z-index: 1000;
+  /* IMPORTANT: don't hide scroll here */
+  overflow: hidden;
+
+  &.open {
+    transform: translateX(0);
+    overflow: visible;
+  }
+
+}
+
+.side-panel-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding-left: 5rem;
+  overflow-y: auto;
+  background-color: #0f0f0f;
+
+  /* hide scrollbar, keep scroll */
+  scrollbar-width: none;        /* Firefox */
+  -ms-overflow-style: none;     /* IE / old Edge */
+}
+
+.side-panel-content::-webkit-scrollbar {
+  display: none;                /* Chrome, Safari, new Edge */
+}
+
+.side-panel-section {
+  display: flex;
+  flex-direction: column; // Image | Text vertical
+  gap: 1rem;
+}
+
+.side-panel-full-image {
+  width: 100%;
+  height: auto;
+  overflow: hidden;
+
+}
+
+.side-panel-image {
+  width: 100%;
+  height: 570px;
+  object-fit: cover;       
+  object-position: top;
+  display: block;
+  opacity: 0;
+  transform: translateY(12px);
+  visibility: hidden;
+  transition: opacity 0.6s ease, transform 0.6s ease;
+  transition-delay: 0.3s;
+}
+
+.side-panel-text {
+  flex: 1;
+  padding: 2.5rem 1.8rem 2.5rem 0; /* remove double left padding */
+  overflow-y: auto;
+  border-left: none; /* remove default border */
+}
+
+/* Keep your header and description styles */
+.panel-header, .side-panel-form-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.55rem;
+  font-weight: 500;
+  letter-spacing: -0.4px;
+  line-height: 1.05;
+  margin-bottom: 0.9rem;
+  color: #f5f5f5;
+}
+
+.panel-header--with-bar::after {
+  content: "";
+  display: block;
+  width: 60px;
+  height: 2px;
+  background: #c9a857;
+  margin-top: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+.panel-content-description {
+  font-family: 'Manrope', sans-serif;
+  color: #e3e3e3;;
+  font-size: 1rem;
+  line-height: 1.85;
+  max-width: 95%;
+  margin-bottom: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.section-heading {
+  margin-bottom: 1.25rem;
+}
+
+.section-header {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.4rem;
+  font-weight: 500;
+  letter-spacing: -0.35px;
+  line-height: 1.05;
+  margin-top: 2.7rem;
+  color: #f5f5f5;
+}
+
+.section-subheader {
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.95rem;       /* subtle subtitle */
+  font-weight: 400;
+  letter-spacing: -0.35px;
+  color: #c9a857;
+  margin-top: 0.25rem;
+  margin-bottom: 2rem;
+  white-space: pre;
+}
+
+// Align heading and buttons in a row
+.section-top-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.25rem;
+
+}
+
+.section-heading {
+  flex: 1;
+}
+
+.section-buttons--inline {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.4rem;
+}
+
+// BUTTONS FOR PROJECTS / RESUME 
+.section-buttons {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;             // space between buttons
+}
+
+.project-button,
+.resume-button {
+  padding: 0.5rem 1.1rem;
+  border-radius: 999px;
+  border: 1px solid #f5f5f5;
+  background: transparent;
+  color: #f5f5f5;
+  font-family: "Manrope", sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: 
+    transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background 0.3s ease,
+    color 0.3s ease,
+    border 0.3s ease;
+}
+
+.project-button:hover,
+.resume-button:hover {
+  background: #c9a857;
+  color: #f5f5f5;
+  border: 1px solid #c9a857;
+  transform: scale(1.1);
+}
+
+/* Row with Name (header) + Resume button */
+.section-header-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem; 
+}
+
+/* ICON ROW - TECHNICAL SKILLS */
+.skills-icon-row-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.skills-icon-header {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 2.1rem;
+  font-weight: 500;
+}
+
+.skills-icon-header::after {
+  content: "";
+  display: block;
+  width: 60px;
+  height: 2px;
+  background: #c9a857;
+  margin-top: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.skills-icon-row {
+  display: flex;
+  justify-content: center;  /* centers icons horizontally */
+  align-items: center;
+  gap: 2.5rem;
+  margin-bottom: 3rem;     
+  margin-top: 3rem;   
+}
+
+/* Each icon+label block */
+.skill-icon-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* SVG wrapper: handles the pop-up effect */
+.skill-icon-svg {
+  transition: transform 0.18s ease-out;
+}
+
+/* Label: hidden by default */
+.skill-label {
+  margin-top: 0.4rem;
+  font-family: "Manrope", sans-serif;
+  font-size: 1rem;
+  letter-spacing: 0.04rem;
+  color: #f5f5f5;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.18s ease-out, transform 0.18s ease-out;
+}
+
+/* Hover effects: icon pops, label fades in */
+.skill-icon-item:hover .skill-icon-svg {
+  transform: scale(1.1);
+}
+
+.skill-icon-item:hover .skill-label {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.skill-icon-item .three-icon path {
+  fill: white !important;
+}
+
+.skill-icon-item .github-icon path:nth-of-type(1) {
+  fill: white !important;
+}
+
+.skill-icon-link {
+  display: inline-block;
+}
+
+.skill-icon-link .skill-icon-svg {
+  cursor: pointer;
+}
+
+/* CONTACT FORM */
+.side-panel-form-wrapper {
+  margin-bottom: 3rem;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.side-panel-form-wrapper .panel-content-description{
+  font-size: 0.9rem;
+}
+
+/* Inner card-ish block */
+.side-panel-form-inner {
+  padding: 2.5rem 4.75rem 3rem;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.05), transparent 55%);
+  box-shadow: 0 26px 60px rgba(0, 0, 0, 0.7);
+  max-width: 840px;
+  width: 90%;
+}
+
+.side-panel-form-contents{
+  max-width: 840px;
+  width: 100%;
+}
+
+/* Form itself */
+.side-panel-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* Each field */
+.side-panel-form .side-panel-form-field {
+  position: relative;
+  width: 100%;
+  margin-top: 1.5rem;
+}
+
+/* Inputs / textareas */
+.side-panel-form .side-panel-form-field input,
+.side-panel-form .side-panel-form-field textarea {
+  width: 100%;
+  padding: 0.6rem 0;
+  font-family: "Manrope", sans-serif;
+  font-size: 0.98rem;
+  border: none;
+  background: none;
+  color: #ffffff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.55);
+  margin-bottom: 1rem;
+  outline: none;
+  resize: none;
+  overflow-y: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+/* Taller textarea */
+.side-panel-form .side-panel-form-field textarea {
+  resize: none;
+  overflow-y: visible;
+}
+
+/* Floating labels */
+.side-panel-form .side-panel-form-field span {
+  position: absolute;
+  left: 0;
+  top: 0.85rem;
+  font-family: "Manrope", sans-serif;
+  font-size: 0.95rem;
+  color: #777;
+  pointer-events: none;
+  transition: 0.22s ease;
+}
+
+.side-panel-form .project-button {
+  align-self: center;       /* overrides form's align-items */
+  margin-top: 2rem;
+  padding-inline: 2.5rem;   /* optional: slightly wider button */
+}
+
+/* Your floating label behavior */
+.side-panel-form .side-panel-form-field input:focus ~ span,
+.side-panel-form .side-panel-form-field input:valid ~ span,
+.side-panel-form .side-panel-form-field textarea:focus ~ span,
+.side-panel-form .side-panel-form-field textarea:valid ~ span {
+  color: #c9a857;
+  font-size: 0.85rem;
+  transform: translateY(-1.5rem);
+  letter-spacing: 0.12rem;
+}
+
+/* Underline accent on focus */
+.side-panel-form .side-panel-form-field input:focus,
+.side-panel-form .side-panel-form-field textarea:focus {
+  border-bottom-color: #c9a857;
+}
+
+/* Bigger button */
+.side-panel-form button.project-button {
+  margin-top: 2.5rem;
+  padding: 0.9rem 2.6rem;
+  font-size: 0.95rem;
+  border-radius: 999px;
+}
+
+/* Inside the profile section (About page),
+   tighten the first two content lines */
+.side-panel-section--profile .panel-content-description:nth-of-type(1),
+.side-panel-section--profile .panel-content-description:nth-of-type(2) {
+  margin-bottom: 0.15rem;   
+  line-height: 1.4;      
+}
+
+/* a bit more space before the rest of the content */
+.side-panel-section--profile .panel-content-description:nth-of-type(3) {         
+  margin-top: 4rem;      /* extra space above the paragraph */
+}
+
+.close-button {
+  position: absolute;
+  top: 50%;                       /* vertical middle */
+  left: 0;                        /* align to the very left border of the panel */
+  transform: translate(-50%, -50%); /* float half outside, half inside */
+  width: 50px;
+  height: 50px;
+  background: #fff;
+  border: 2px solid #e5e5e5;
+  color: #111;
+  font-size: 1.4rem;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+  transition: all 0.3s ease;
+  border-radius: 0;                /* square button */
+
+  &:hover {
+    background: #c9a857;
+    color: #fff;
+    border-color: #c9a857;
+    transform: translate(-50%, -50%) scale(1.1); /* pop effect */
+  }
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0; 
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(3px); /*  blur background */
+  background: rgba(0, 0, 0, 0.3); /* dim effect */
+  opacity: 0;
+  pointer-events: none; /* so it doesn't block clicks when hidden */
+  transition: opacity 0.3s ease;
+  z-index: 900; /* just under the side-panel */
+}
+
+.overlay.open {
+  opacity: 1;
+  pointer-events: auto; /* now it can block clicks if you want */
+}
+
+/* === LIGHT MODE VARIATION === */
+.side-panel.light-mode {
+  background-color: #ffffff; // white background
+
+  .side-panel-content {
+    background-color: #ffffff; // white background
+  }
+
+  .panel-header, 
+  .panel-content-description,
+  .section-header,
+  .skill-label,
+  .skills-icon-header {
+    color: #000000; // header text
+  }
+
+  .section-subheader {
+    color: #806634; // subheader text
+  }
+
+  .project-button, .resume-button {
+    border-color: #000000;
+    color: #000000;
+
+    &:hover {
+      background: #c9a857;
+      color: #ffffff;
+      border-color: #c9a857;
+    }
+  }
+
+  .close-button {
+    background: #000000;
+    border-color: #000000;
+    color: #ffffff;
+
+    &:hover {
+      background: #c9a857;
+      border-color: #c9a857;
+      color: #ffffff;
+      transform: translate(-50%, -50%) scale(1.1);
+    }
+  }
+
+  .skill-icon-item .three-icon.light path {
+    fill: black !important;
+  }
+
+  .skill-icon-item .github-icon.light path:nth-of-type(1) {
+    fill: black !important;
+  }
+
+  .side-panel-form-inner {
+    /* Softer dark border on light bg */
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    /* Gentle light tint so it doesn’t disappear into pure white */
+    background: radial-gradient(
+        circle at top left,
+        rgba(0, 0, 0, 0.03),
+        transparent 55%
+      ),
+      #ffffff;
+    /* Lighter shadow for light mode */
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.16);
+  }
+
+  .side-panel-form .side-panel-form-field input,
+  .side-panel-form .side-panel-form-field textarea {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.35);
+    color: #000000;
+  }
+
+  .side-panel-form .side-panel-form-field input:focus,
+  .side-panel-form .side-panel-form-field textarea:focus {
+    border-bottom-color: #c9a857;
+  }
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* Text Animations */
+/* Apply hidden state ONLY when panel is open */
+.side-panel .section-header,
+.side-panel .section-subheader,
+.side-panel .panel-header,
+.side-panel .panel-header--with-bar::after,
+.side-panel .panel-content-description,
+.side-panel .side-panel-form-inner,
+.side-panel .resume-button-wrapper, 
+.side-panel .skills-icon-row-wrapper{   // <-- updated
+  opacity: 0;
+  transform: translateY(14px);
+}
+
+/* only when panel is open, play the animations */
+.side-panel.open .side-panel-image {
+  opacity: 1;
+  transform: translateY(0);
+  visibility: visible;
+  animation: fadeIn 1s ease-out forwards;
+  animation-delay: 0.6s;
+}
+
+.side-panel.open .panel-header {
+  animation: fadeInUp 1.2s ease-out forwards;
+  animation-delay: 0.7s;
+}
+
+.side-panel.open .panel-header--with-bar::after {
+  animation: fadeInUp 1.2s ease-out forwards;
+  animation-delay: 0.7s;
+}
+
+.side-panel.open .section-header,
+.side-panel.open .resume-button-wrapper,
+.side-panel.open .section-subheader {
+  animation: fadeInUp 1.4s ease-out forwards;
+  animation-delay: 0.8s;
+}
+
+.side-panel.open .panel-content-description {
+  animation: fadeInUp 1.6s ease-out forwards;
+  animation-delay: 0.9s;
+}
+
+.side-panel.open .skills-icon-row-wrapper {   // <-- updated
+  animation: fadeInUp 1.4s ease-out forwards;
+  animation-delay: 0.9s;
+}
+
+.side-panel.open .side-panel-form-inner {
+  animation: fadeInUp 1.7s ease-out forwards;
+  animation-delay: 0.10s;
+}
+
+/* RESPONSIVENESS */
+
+/* Laptop */
+@media (max-width: 1500px) {
+  .side-panel-image {
+    object-position: 35% top;
+  }
+
+  .resume-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.77rem;
+  }
+}
+
+/* Mobile */
+@media (max-width: 425px) {
+
+  .side-panel-content {
+    width: 100%;
+    padding-left: 0;
+    padding-right: 0;
+    overflow-x: hidden; /* CRITICAL */
+  }
+
+  .side-panel-full-image {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    padding: 0;
+  }
+
+  .side-panel-image {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    max-height: 42vh;
+    display: block;
+  }
+
+  .side-panel-text {
+    margin-left: 15px;
+    margin-right: 15px;
+    padding-right: 0%;
+  }
+
+  .close-button {
+    top: auto;
+    left: auto;
+    bottom: 4%;
+    right: 4%;
+    transform: none;          /* remove translate centering */
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;       /* better for thumb reach */
+    font-size: 1.6rem;
+    z-index: 1100;          /* above overlay */
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .close-button:hover {
+    transform: scale(1.05);   /* keep subtle hover without shifting position */
+  }
+
+  .skills-icon-row {
+    gap: 1.4rem;     /* tighter spacing */
+    margin-top: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .skills-icon-row-wrapper{
+    margin-left: 15px;
+    margin-right: 15px;
+  }
+
+  .skill-icon-svg svg {
+    width: 50px;     /* smaller icons */
+    height: 50px;
+  }
+
+  .skill-label {
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+  }
+
+  .project-button,
+  .resume-button {
+    padding: 0.45rem 1.1rem;
+    font-size: 0.55rem;
+    border-radius: 999px;
+  }
+
+  .section-buttons {
+    gap: 0.5rem;   /* tighter stacking on mobile */
+  }
+
+  .side-panel-form button.project-button {
+    padding: 0.75rem 2.1rem;
+    font-size: 0.85rem;
+  }
+
+  .panel-header,
+  .section-header {
+    font-size: 1.85rem;
+  }
+
+  .skills-icon-header {
+    font-size: 1.65rem;
+    margin-left: 15px;
+    margin-right: 15px;
+  }
+
+  .panel-content-description {
+    font-size: 0.88rem;     /* better readability without being bulky */
+    line-height: 1.65;     /* tighter vertical rhythm */
+    max-width: 100%;
+    margin-bottom: 1.2rem;
+  }
+
+  .side-panel-section--profile .panel-content-description:nth-of-type(1),
+  .side-panel-section--profile .panel-content-description:nth-of-type(2) {
+    margin-bottom: 0.4rem;
+    line-height: 1.45;
+  }
+
+  .side-panel-section--profile .panel-content-description:nth-of-type(3) {
+    margin-top: 1.8rem;
+  }
+}
+
+/* Tablet */
+@media (max-width: 768px) {
+
+  .side-panel-content {
+    width: 100%;
+    padding-left: 0;
+    padding-right: 0;
+    overflow-x: hidden; /* ✅ CRITICAL */
+  }
+
+  .side-panel-full-image {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    padding: 0;
+  }
+
+  .side-panel-image {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    max-height: 42vh;
+    display: block;
+  }
+
+  .side-panel-text {
+    margin-left: 15px;
+    margin-right: 15px;
+    padding-right: 0%;
+  }
+
+  .close-button {
+    top: auto;
+    left: auto;
+    bottom: 4%;
+    right: 4%;
+    transform: none;          /* remove translate centering */
+    width: 66px;
+    height: 66px;
+    border-radius: 50%;       /* better for thumb reach */
+    font-size: 1.6rem;
+    z-index: 1100;          /* above overlay */
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .close-button:hover {
+    transform: scale(1.05);   /* keep subtle hover without shifting position */
+  }
+
+  .skills-icon-row {
+    gap: 2rem;     /* tighter spacing */
+    margin-top: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .skills-icon-row-wrapper{
+    margin-left: 15px;
+    margin-right: 15px;
+  }
+
+  .skill-icon-svg svg {
+    width: 60px;     /* smaller icons */
+    height: 60px;
+  }
+
+  .skill-label {
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+  }
+
+  .project-button,
+  .resume-button {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.95rem;
+    border-radius: 999px;
+  }
+
+  .section-buttons {
+    gap: 0.5rem;   /* tighter stacking on mobile */
+  }
+
+  .side-panel-form button.project-button {
+    padding: 0.75rem 2.1rem;
+    font-size: 0.85rem;
+  }
+
+  .panel-header,
+  .section-header {
+    font-size: 2.85rem;
+  }
+
+  .skills-icon-header {
+    font-size: 2rem;
+  }
+
+  .panel-content-description {
+    font-size: 1rem;     /* better readability without being bulky */
+    line-height: 1.65;     /* tighter vertical rhythm */
+    max-width: 100%;
+    margin-bottom: 1.2rem;
+  }
+
+  .side-panel-section--profile .panel-content-description:nth-of-type(1),
+  .side-panel-section--profile .panel-content-description:nth-of-type(2) {
+    margin-bottom: 0.4rem;
+    line-height: 1.45;
+  }
+
+  .side-panel-section--profile .panel-content-description:nth-of-type(3) {
+    margin-top: 1.8rem;
+  }
+}
+
