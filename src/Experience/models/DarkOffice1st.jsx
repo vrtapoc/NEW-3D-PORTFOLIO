@@ -1,9 +1,16 @@
 import React, { useMemo } from 'react';
-import { useGLTF, useTexture } from '@react-three/drei';
+import { useTexture } from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
 import * as THREE from 'three';
+
+// 1. GLOBAL UNIFIED ROOM PARAMETERS
+const ROOM_SIZE = 5.6; // Length of floor along X and Z
+const WALL_HEIGHT = 3.2; // Uniform height for both walls
+const WALL_THICKNESS = 0.38; // Uniform thickness for both walls
+const SLAB_HEIGHT = 0.22; // Thickness of foundation slab underneath
+const FLOOR_Y = 0; // Top level of the floor
+
 export default function Model(props) {
-  const { nodes } = useGLTF('/models/DarkOffice1st.glb');
   const gl = useThree((state) => state.gl);
   const maxAnisotropy = gl?.capabilities?.getMaxAnisotropy ? gl.capabilities.getMaxAnisotropy() : 16;
 
@@ -28,7 +35,6 @@ export default function Model(props) {
         ctx.fillStyle = tones[i % tones.length];
         ctx.fillRect(0, y, 1024, plankHeight);
 
-        // Plank bevel seam
         ctx.strokeStyle = '#180E09';
         ctx.lineWidth = 3;
         ctx.beginPath();
@@ -36,7 +42,6 @@ export default function Model(props) {
         ctx.lineTo(1024, y);
         ctx.stroke();
 
-        // Wood grain
         ctx.strokeStyle = 'rgba(25, 15, 10, 0.25)';
         ctx.lineWidth = 1.2;
         for (let g = 0; g < 6; g++) {
@@ -61,15 +66,13 @@ export default function Model(props) {
     }
   }, []);
 
-  // STEP 1: POLY HAVEN "WOOD CABINET WORN LONG" 2K PBR MAPS (16x Anisotropy for Razor-Sharp Detail)
+  // POLY HAVEN "WOOD CABINET WORN LONG" 2K PBR MAPS (16x Anisotropy)
   const [woodDiff, woodAo, woodArm, woodDisp] = useTexture([
     '/textures/floor/wood_diff_2k.jpg',
     '/textures/floor/wood_ao_2k.jpg',
     '/textures/floor/wood_arm_2k.jpg',
     '/textures/floor/wood_disp_2k.png',
-  ], (textures) => {
-    // Loaded callback
-  }, (err) => {
+  ], () => {}, (err) => {
     console.warn('[DarkOffice1st] Warning loading floor PBR maps, using fallback procedural wood texture:', err);
   });
 
@@ -88,8 +91,8 @@ export default function Model(props) {
     if (woodDiff) woodDiff.colorSpace = THREE.SRGBColorSpace;
   }, [woodDiff, woodAo, woodArm, woodDisp, maxAnisotropy]);
 
-  // WALL & SHELVING MATERIAL (Ultra-Matte Deep Charcoal/Black #141211)
-  const darkWallMaterial = useMemo(() => {
+  // 2. MATERIALS
+  const wallMaterial = useMemo(() => {
     return new THREE.MeshStandardMaterial({
       color: new THREE.Color("#141211"),
       roughness: 0.94,
@@ -100,245 +103,238 @@ export default function Model(props) {
     });
   }, []);
 
-  // EXTERIOR GROUND / BACKDROP MATERIAL (Deep studio dark #080708)
-  const exteriorGroundMaterial = useMemo(() => {
+  const floorMaterial = useMemo(() => {
     return new THREE.MeshStandardMaterial({
-      color: new THREE.Color('#080708'),
-      roughness: 1.0,
+      map: woodDiff || fallbackWoodTexture,
+      aoMap: woodAo,
+      aoMapIntensity: 1.0,
+      roughnessMap: woodArm,
+      bumpMap: woodDisp,
+      bumpScale: 0.015,
+      color: "#FFFFFF",
+      roughness: 0.85,
       metalness: 0.0,
+      envMapIntensity: 0.02,
+      side: THREE.DoubleSide,
     });
-  }, []);
+  }, [woodDiff, woodAo, woodArm, woodDisp, fallbackWoodTexture]);
 
-  // ARCHITECTURAL LIGHTING TARGETS (scaled for 1.25x room and 2-section built-in unit)
+  // 4. SPOTLIGHTS TARGETS
   const spotTargets = useMemo(() => {
-    const t1 = new THREE.Object3D(); t1.position.set(-2.03, 0.20, 1.16);
-    const t2 = new THREE.Object3D(); t2.position.set(-2.03, 0.20, -0.25);
-    const t3 = new THREE.Object3D(); t3.position.set(-2.03, 0.20, -1.58);
-    // 2-Section Back Wall Unit: t4 (Shelving Bay), t5 (Mural Niche)
-    const t4 = new THREE.Object3D(); t4.position.set(-0.94, 0.20, -2.16);
-    const t5 = new THREE.Object3D(); t5.position.set(0.94, 0.20, -2.16);
-    return { t1, t2, t3, t4, t5 };
+    // Left Wall 3 Downlight Targets (aligned along Left Wall)
+    const tL1 = new THREE.Object3D(); tL1.position.set(-ROOM_SIZE / 2 + 0.6, FLOOR_Y, -ROOM_SIZE / 2 + ROOM_SIZE * 0.25);
+    const tL2 = new THREE.Object3D(); tL2.position.set(-ROOM_SIZE / 2 + 0.6, FLOOR_Y, -ROOM_SIZE / 2 + ROOM_SIZE * 0.50);
+    const tL3 = new THREE.Object3D(); tL3.position.set(-ROOM_SIZE / 2 + 0.6, FLOOR_Y, -ROOM_SIZE / 2 + ROOM_SIZE * 0.75);
+
+    // Right Wall 2 Downlight Targets (Bay 1: Shelves, Bay 2: Mural Alcove)
+    const tR1 = new THREE.Object3D(); tR1.position.set(-ROOM_SIZE / 2 + ROOM_SIZE * 0.25, FLOOR_Y, -ROOM_SIZE / 2 + 0.6);
+    const tR2 = new THREE.Object3D(); tR2.position.set(-ROOM_SIZE / 2 + ROOM_SIZE * 0.75, FLOOR_Y, -ROOM_SIZE / 2 + 0.6);
+
+    return { tL1, tL2, tL3, tR1, tR2 };
   }, []);
 
-  // Isolate Floor Mesh from Walls/Shelving Geometry
-  const { floorGeometry, wallGeometry } = useMemo(() => {
-    if (!nodes?.Wall1k_Baked?.geometry) return {};
-    const orig = nodes.Wall1k_Baked.geometry.toNonIndexed();
-    const pos = orig.attributes.position;
-    const norm = orig.attributes.normal;
-    const uv = orig.attributes.uv;
-
-    const floorPositions = [];
-    const floorNormals = [];
-    const floorUvs = [];
-
-    const wallPositions = [];
-    const wallNormals = [];
-    const wallUvs = [];
-
-    for (let i = 0; i < pos.count; i += 3) {
-      // Average normal and position of triangle
-      const ny = (norm.getY(i) + norm.getY(i + 1) + norm.getY(i + 2)) / 3;
-      const py = (pos.getY(i) + pos.getY(i + 1) + pos.getY(i + 2)) / 3;
-      const px = (pos.getX(i) + pos.getX(i + 1) + pos.getX(i + 2)) / 3;
-      const pz = (pos.getZ(i) + pos.getZ(i + 1) + pos.getZ(i + 2)) / 3;
-
-      // Floor triangles are facing upward (ny > 0.8) and at floor level (py < 0.25)
-      if (ny > 0.8 && py < 0.25) {
-        for (let j = 0; j < 3; j++) {
-          floorPositions.push(pos.getX(i + j), pos.getY(i + j), pos.getZ(i + j));
-          floorNormals.push(norm.getX(i + j), norm.getY(i + j), norm.getZ(i + j));
-          floorUvs.push(uv ? uv.getX(i + j) : 0, uv ? uv.getY(i + j) : 0);
-        }
-      } else {
-        // Discard old back wall & baked 3-column shelving triangles (pz < -1.45 && px > -1.55)
-        const isOldBackShelves = pz < -1.45 && px > -1.55;
-        if (!isOldBackShelves) {
-          for (let j = 0; j < 3; j++) {
-            wallPositions.push(pos.getX(i + j), pos.getY(i + j), pos.getZ(i + j));
-            wallNormals.push(norm.getX(i + j), norm.getY(i + j), norm.getZ(i + j));
-            wallUvs.push(uv ? uv.getX(i + j) : 0, uv ? uv.getY(i + j) : 0);
-          }
-        }
-      }
-    }
-
-    const fGeom = new THREE.BufferGeometry();
-    fGeom.setAttribute('position', new THREE.Float32BufferAttribute(floorPositions, 3));
-    fGeom.setAttribute('normal', new THREE.Float32BufferAttribute(floorNormals, 3));
-    fGeom.setAttribute('uv', new THREE.Float32BufferAttribute(floorUvs, 2));
-    fGeom.setAttribute('uv2', new THREE.Float32BufferAttribute(floorUvs, 2));
-
-    const wGeom = new THREE.BufferGeometry();
-    wGeom.setAttribute('position', new THREE.Float32BufferAttribute(wallPositions, 3));
-    wGeom.setAttribute('normal', new THREE.Float32BufferAttribute(wallNormals, 3));
-    wGeom.setAttribute('uv', new THREE.Float32BufferAttribute(wallUvs, 2));
-
-    return { floorGeometry: fGeom, wallGeometry: wGeom };
-  }, [nodes]);
+  const shelfWidth = (ROOM_SIZE / 2) - 0.2;
 
   return (
     <group {...props} dispose={null}>
-      {/* Scaled Room Shell & Floor: 1.25x width, 1.1x height, 1.25x depth */}
-      <group scale={[1.25, 1.1, 1.25]}>
-        {/* 1. Perimeter Walls (Isolated) */}
-        {wallGeometry && (
-          <mesh
-            geometry={wallGeometry}
-            material={darkWallMaterial}
-            position={[0.001, 0.008, 0]}
-          />
-        )}
+      {/* Centered Unified Room Structure */}
+      <group position={[-ROOM_SIZE / 2, 0, -ROOM_SIZE / 2]}>
+        
+        {/* A. Foundation Slab (Standard crisp box directly beneath the floor) */}
+        <mesh
+          position={[(ROOM_SIZE - WALL_THICKNESS) / 2, -SLAB_HEIGHT / 2, (ROOM_SIZE - WALL_THICKNESS) / 2]}
+          material={wallMaterial}
+          receiveShadow
+        >
+          <boxGeometry args={[ROOM_SIZE + WALL_THICKNESS, SLAB_HEIGHT, ROOM_SIZE + WALL_THICKNESS]} />
+        </mesh>
 
-        {/* 2. Isolated Floor Mesh with Natural Matte Hardwood PBR Material */}
-        {floorGeometry && (
+        {/* B. PBR Wood Flooring (Elevated 5mm above slab to eliminate Z-fighting) */}
+        <mesh
+          position={[ROOM_SIZE / 2, FLOOR_Y + 0.005, ROOM_SIZE / 2]}
+          rotation={[-Math.PI / 2, 0, 0]}
+          material={floorMaterial}
+          receiveShadow
+        >
+          <planeGeometry args={[ROOM_SIZE, ROOM_SIZE]} />
+        </mesh>
+
+        {/* C. Left Wall (Solid, Flat Architectural Wall - castShadow={false} prevents floor shadow) */}
+        <mesh
+          position={[-WALL_THICKNESS / 2, WALL_HEIGHT / 2, (ROOM_SIZE - WALL_THICKNESS) / 2]}
+          material={wallMaterial}
+          receiveShadow
+        >
+          <boxGeometry args={[WALL_THICKNESS, WALL_HEIGHT, ROOM_SIZE + WALL_THICKNESS]} />
+        </mesh>
+
+        {/* D. Right Wall (Built-in 2-Bay Unit - castShadow={false} keeps floor evenly lit) */}
+        <group position={[0, 0, 0]}>
+          {/* Backboard */}
           <mesh
-            geometry={floorGeometry}
-            position={[0.001, 0.008, 0]}
+            position={[ROOM_SIZE / 2, WALL_HEIGHT / 2, -WALL_THICKNESS + 0.025]}
+            material={wallMaterial}
             receiveShadow
           >
-            <meshStandardMaterial
-              map={woodDiff || fallbackWoodTexture}
-              aoMap={woodAo}
-              aoMapIntensity={1.0}
-              roughnessMap={woodArm}
-              bumpMap={woodDisp}
-              bumpScale={0.015}
-              color="#FFFFFF"
-              roughness={0.85}
-              metalness={0.0}
-              envMapIntensity={0.02}
-              side={THREE.DoubleSide}
-            />
-          </mesh>
-        )}
-
-        {/* 3. Reconfigured 2-Bay Built-In Wall Unit */}
-        <group position={[0, 0, 0]}>
-          {/* Outer Perimeter Frame & Central Dividing Pillar */}
-          {/* Top Header Beam */}
-          <mesh position={[0, 2.30, -1.95]} material={darkWallMaterial} castShadow receiveShadow>
-            <boxGeometry args={[3.10, 0.08, 0.35]} />
-          </mesh>
-          {/* Left Frame Column */}
-          <mesh position={[-1.50, 1.25, -1.95]} material={darkWallMaterial} castShadow receiveShadow>
-            <boxGeometry args={[0.10, 2.10, 0.35]} />
-          </mesh>
-          {/* Right Frame Column */}
-          <mesh position={[1.50, 1.25, -1.95]} material={darkWallMaterial} castShadow receiveShadow>
-            <boxGeometry args={[0.10, 2.10, 0.35]} />
-          </mesh>
-          {/* Center Dividing Pillar (Separates Section A & Section B) */}
-          <mesh position={[0.0, 1.25, -1.95]} material={darkWallMaterial} castShadow receiveShadow>
-            <boxGeometry args={[0.10, 2.10, 0.35]} />
-          </mesh>
-          {/* Bottom Counter / Base Plinth */}
-          <mesh position={[0, 0.24, -1.95]} material={darkWallMaterial} castShadow receiveShadow>
-            <boxGeometry args={[3.10, 0.08, 0.35]} />
-          </mesh>
-          {/* Recessed Alcove Backing Panel */}
-          <mesh position={[0, 1.27, -2.12]} material={darkWallMaterial} receiveShadow>
-            <boxGeometry args={[3.10, 2.10, 0.02]} />
+            <boxGeometry args={[ROOM_SIZE, WALL_HEIGHT, 0.05]} />
           </mesh>
 
-          {/* Section A (Left Bay): 3-Tier Horizontal Shelving for Future Objects */}
-          <mesh position={[-0.75, 0.75, -1.95]} material={darkWallMaterial} castShadow receiveShadow>
-            <boxGeometry args={[1.40, 0.04, 0.32]} />
-          </mesh>
-          <mesh position={[-0.75, 1.25, -1.95]} material={darkWallMaterial} castShadow receiveShadow>
-            <boxGeometry args={[1.40, 0.04, 0.32]} />
-          </mesh>
-          <mesh position={[-0.75, 1.75, -1.95]} material={darkWallMaterial} castShadow receiveShadow>
-            <boxGeometry args={[1.40, 0.04, 0.32]} />
+          {/* Top Header */}
+          <mesh
+            position={[ROOM_SIZE / 2, WALL_HEIGHT - 0.15, -WALL_THICKNESS / 2]}
+            material={wallMaterial}
+            receiveShadow
+          >
+            <boxGeometry args={[ROOM_SIZE, 0.3, WALL_THICKNESS]} />
           </mesh>
 
-          {/* Section B (Right Bay): Large, Clean Open Whole-Block Niche for Future Mural/Painting */}
-          {/* Left completely open and recessed without intermediate planks */}
+          {/* Bottom Base */}
+          <mesh
+            position={[ROOM_SIZE / 2, 0.09, -WALL_THICKNESS / 2]}
+            material={wallMaterial}
+            receiveShadow
+          >
+            <boxGeometry args={[ROOM_SIZE, 0.18, WALL_THICKNESS]} />
+          </mesh>
+
+          {/* Left Vertical Divider Pillar (Side Jamb framing the Shelves) */}
+          <mesh
+            position={[0.1, WALL_HEIGHT / 2, -WALL_THICKNESS / 2]}
+            material={wallMaterial}
+            receiveShadow
+          >
+            <boxGeometry args={[0.2, WALL_HEIGHT, WALL_THICKNESS]} />
+          </mesh>
+
+          {/* Center Divider */}
+          <mesh
+            position={[ROOM_SIZE / 2, WALL_HEIGHT / 2, -WALL_THICKNESS / 2]}
+            material={wallMaterial}
+            receiveShadow
+          >
+            <boxGeometry args={[0.2, WALL_HEIGHT, WALL_THICKNESS]} />
+          </mesh>
+
+          {/* Right Outer Cap */}
+          <mesh
+            position={[ROOM_SIZE - 0.125, WALL_HEIGHT / 2, -WALL_THICKNESS / 2]}
+            material={wallMaterial}
+            receiveShadow
+          >
+            <boxGeometry args={[0.25, WALL_HEIGHT, WALL_THICKNESS]} />
+          </mesh>
+
+          {/* Bay 1: Left Bay Shelves (Framed neatly between Left Pillar and Center Divider) */}
+          <mesh
+            position={[((ROOM_SIZE / 2 - 0.1) + 0.2) / 2, 0.86, -WALL_THICKNESS / 2]}
+            material={wallMaterial}
+            receiveShadow
+          >
+            <boxGeometry args={[(ROOM_SIZE / 2 - 0.1) - 0.2, 0.06, WALL_THICKNESS - 0.06]} />
+          </mesh>
+          <mesh
+            position={[((ROOM_SIZE / 2 - 0.1) + 0.2) / 2, 1.54, -WALL_THICKNESS / 2]}
+            material={wallMaterial}
+            receiveShadow
+          >
+            <boxGeometry args={[(ROOM_SIZE / 2 - 0.1) - 0.2, 0.06, WALL_THICKNESS - 0.06]} />
+          </mesh>
+          <mesh
+            position={[((ROOM_SIZE / 2 - 0.1) + 0.2) / 2, 2.22, -WALL_THICKNESS / 2]}
+            material={wallMaterial}
+            receiveShadow
+          >
+            <boxGeometry args={[(ROOM_SIZE / 2 - 0.1) - 0.2, 0.06, WALL_THICKNESS - 0.06]} />
+          </mesh>
+
+          {/* Bay 2: Right Bay (Completely Open Vertical Recessed Mural Block) */}
         </group>
       </group>
 
-      {/* Exterior Ground Plane */}
-      {nodes?.Floor2k_Baked?.geometry && (
-        <mesh
-          geometry={nodes.Floor2k_Baked.geometry}
-          material={exteriorGroundMaterial}
-          position={[0, -0.01, 0]}
-        />
-      )}
-
-      {/* 4. Architectural Grazing Spotlights with Soft Falloff (penumbra=0.85, #FFE4CC) */}
-      {/* Left Wall Downlights (3 soft washes) */}
-      <primitive object={spotTargets.t1} />
+      {/* 4. ARCHITECTURAL LIGHTING & SPOTLIGHTS (Smooth Soft Falloff penumbra=0.8) */}
+      {/* Left Wall Downlights (3 Evenly Spaced Soft Washes) */}
+      <primitive object={spotTargets.tL1} />
       <spotLight
-        position={[-1.78, 2.65, 1.16]}
-        target={spotTargets.t1}
-        angle={Math.PI / 6}
-        penumbra={0.85}
-        intensity={2.8}
-        distance={7.0}
+        position={[-ROOM_SIZE / 2 + 0.25, WALL_HEIGHT + 0.35, -ROOM_SIZE / 2 + ROOM_SIZE * 0.25]}
+        target={spotTargets.tL1}
+        angle={Math.PI / 5}
+        penumbra={0.8}
+        intensity={3.2}
+        distance={8.0}
         decay={2}
         color="#FFE4CC"
       />
 
-      <primitive object={spotTargets.t2} />
+      <primitive object={spotTargets.tL2} />
       <spotLight
-        position={[-1.78, 2.65, -0.25]}
-        target={spotTargets.t2}
-        angle={Math.PI / 6}
-        penumbra={0.85}
-        intensity={2.8}
-        distance={7.0}
+        position={[-ROOM_SIZE / 2 + 0.25, WALL_HEIGHT + 0.35, -ROOM_SIZE / 2 + ROOM_SIZE * 0.50]}
+        target={spotTargets.tL2}
+        angle={Math.PI / 5}
+        penumbra={0.8}
+        intensity={3.2}
+        distance={8.0}
         decay={2}
         color="#FFE4CC"
       />
 
-      <primitive object={spotTargets.t3} />
+      <primitive object={spotTargets.tL3} />
       <spotLight
-        position={[-1.78, 2.65, -1.58]}
-        target={spotTargets.t3}
-        angle={Math.PI / 6}
-        penumbra={0.85}
-        intensity={2.8}
-        distance={7.0}
+        position={[-ROOM_SIZE / 2 + 0.25, WALL_HEIGHT + 0.35, -ROOM_SIZE / 2 + ROOM_SIZE * 0.75]}
+        target={spotTargets.tL3}
+        angle={Math.PI / 5}
+        penumbra={0.8}
+        intensity={3.2}
+        distance={8.0}
         decay={2}
         color="#FFE4CC"
       />
 
-      {/* Back Wall 2-Bay Downlights: Aligned to Section A & Section B */}
-      {/* Section A (Shelving Bay) Downlight */}
-      <primitive object={spotTargets.t4} />
+      {/* Right Wall Downlights */}
+      {/* Spotlight 1: Bay 1 (Left Shelving Bay) */}
+      <primitive object={spotTargets.tR1} />
       <spotLight
-        position={[-0.94, 2.65, -1.78]}
-        target={spotTargets.t4}
-        angle={Math.PI / 6}
-        penumbra={0.85}
-        intensity={3.0}
-        distance={7.0}
+        position={[-ROOM_SIZE / 2 + ROOM_SIZE * 0.25, WALL_HEIGHT + 0.35, -ROOM_SIZE / 2 + 0.25]}
+        target={spotTargets.tR1}
+        angle={Math.PI / 5}
+        penumbra={0.8}
+        intensity={3.4}
+        distance={8.0}
         decay={2}
         color="#FFE4CC"
       />
 
-      {/* Section B (Mural / Art Niche) Downlight */}
-      <primitive object={spotTargets.t5} />
+      {/* Spotlight 2: Bay 2 (Right Mural / Art Alcove) */}
+      <primitive object={spotTargets.tR2} />
       <spotLight
-        position={[0.94, 2.65, -1.78]}
-        target={spotTargets.t5}
-        angle={Math.PI / 6}
-        penumbra={0.85}
-        intensity={3.0}
-        distance={7.0}
+        position={[-ROOM_SIZE / 2 + ROOM_SIZE * 0.75, WALL_HEIGHT + 0.35, -ROOM_SIZE / 2 + 0.25]}
+        target={spotTargets.tR2}
+        angle={Math.PI / 5}
+        penumbra={0.8}
+        intensity={3.4}
+        distance={8.0}
         decay={2}
         color="#FFE4CC"
       />
 
-      {/* Shelving & Niche Accent Glow */}
-      <pointLight position={[-0.94, 1.5, -2.1]} color="#FFB370" intensity={0.55} distance={2.5} decay={2} />
-      <pointLight position={[0.94, 1.6, -2.1]} color="#FFB370" intensity={0.55} distance={2.5} decay={2} />
+      {/* Warm Ambient Accent Glows inside Shelves & Mural Bay */}
+      <pointLight
+        position={[-ROOM_SIZE / 2 + ROOM_SIZE * 0.25, 1.5, -ROOM_SIZE / 2 + 0.1]}
+        color="#FFB370"
+        intensity={0.55}
+        distance={3.0}
+        decay={2}
+      />
+      <pointLight
+        position={[-ROOM_SIZE / 2 + ROOM_SIZE * 0.75, 1.5, -ROOM_SIZE / 2 + 0.1]}
+        color="#FFB370"
+        intensity={0.55}
+        distance={3.0}
+        decay={2}
+      />
     </group>
   );
 }
 
-useGLTF.preload('/models/DarkOffice1st.glb');
 useTexture.preload('/textures/floor/wood_diff_2k.jpg');
 useTexture.preload('/textures/floor/wood_ao_2k.jpg');
 useTexture.preload('/textures/floor/wood_arm_2k.jpg');

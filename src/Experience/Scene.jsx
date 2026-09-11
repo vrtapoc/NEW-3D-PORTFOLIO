@@ -62,8 +62,8 @@ const Scene = ({ pointerRef }) => {
 
       {/* Dark Room — Architecture Focus: Walls, Built-in Shelves & PBR Wood Flooring */}
       <group ref={darkgroupRef} visible={isDarkRoom}>
-        {/* Soft Dark Slate/Indigo Ambient Fill (adds readable depth to shadows) */}
-        <ambientLight color="#2A2B36" intensity={0.35} />
+        {/* Warm Ambient Fill for Wood Grain Readability */}
+        <ambientLight color="#302620" intensity={0.6} />
         <directionalLight position={[12, 22, 14]} intensity={0.20} color="#3A3028" />
 
         {/* Signature Atmospheric Background Studio Void Glow */}
